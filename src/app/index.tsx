@@ -9,7 +9,7 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <HomeHeader />
+      <HomeHeader data={{ total: "R$ 2.680,00" }} />
     </View>
   );
 }
