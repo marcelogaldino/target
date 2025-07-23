@@ -25,7 +25,7 @@ export function Summary({ data, icon, isLeft = false }: Props) {
         <Text style={styles.label}>{data.label}</Text>
       </View>
 
-      <Text>{data.value}</Text>
+      <Text style={styles.value}>{data.value}</Text>
     </View>
   );
 }
