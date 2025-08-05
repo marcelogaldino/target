@@ -3,7 +3,7 @@ import { HomeHeader } from "@/components/HomeHeader";
 import { List } from "@/components/List";
 import { Target } from "@/components/Target";
 import { router } from "expo-router";
-import { View } from "react-native";
+import { StatusBar, View } from "react-native";
 
 const summary = {
   total: "R$ 2.680,00",
@@ -35,6 +35,7 @@ export default function Index() {
         flex: 1,
       }}
     >
+      <StatusBar barStyle="light-content" />
       <HomeHeader data={summary} />
 
       <List
