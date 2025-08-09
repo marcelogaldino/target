@@ -2,7 +2,6 @@ import { Button } from "@/components/Button";
 import { CurrencyInput } from "@/components/CurrencyInput";
 import { Input } from "@/components/Input";
 import { PageHeader } from "@/components/PageHeader";
-import { router } from "expo-router";
 import { View } from "react-native";
 
 export default function Target() {
