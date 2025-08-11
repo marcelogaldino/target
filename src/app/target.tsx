@@ -21,9 +21,13 @@ export default function Target() {
         }}
       />
 
-      <View style={{marginTop: 32, gap: 24}}>
+      <View style={{ marginTop: 32, gap: 24 }}>
         <Input label="Nome da meta" />
-        <CurrencyInput label="Valor alvo (R$)" value={1250.50} onChangeValue={() => {}} />
+        <CurrencyInput
+          label="Valor alvo (R$)"
+          value={1250.5}
+          onChangeValue={() => {}}
+        />
         <Button title="Salvar" />
       </View>
     </View>

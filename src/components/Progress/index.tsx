@@ -5,11 +5,11 @@ type SavedValues = {
   current: string;
   target: string;
   percentage: number;
-}
+};
 
 type Props = {
-  data: SavedValues
-}
+  data: SavedValues;
+};
 
 export function Progress({ data }: Props) {
   return (
@@ -19,16 +19,16 @@ export function Progress({ data }: Props) {
       <View style={styles.status}>
         <Text style={styles.value}>
           {data.current}
-          <Text style={styles.target}>de {data.target}</Text>
+          <Text style={styles.target}> de {data.target}</Text>
         </Text>
 
-        <Text style={styles.percentage}>
-          {data.percentage}%
-        </Text>
+        <Text style={styles.percentage}>{data.percentage}%</Text>
       </View>
 
       <View style={styles.progress}>
-        <View style={[styles.currentProgress, { width: `${data.percentage}%` }]} />
+        <View
+          style={[styles.currentProgress, { width: `${data.percentage}%` }]}
+        />
       </View>
     </View>
   );
