@@ -4,12 +4,10 @@ import { PageHeader } from "@/components/PageHeader";
 import { Progress } from "@/components/Progress";
 import { Transaction, TransactionProps } from "@/components/Transaction";
 import { TransactionTypes } from "@/utils/TransactionType";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { View } from "react-native";
 
 export default function InProgress() {
-  const params = useLocalSearchParams<{ id: string }>();
-
   const details = {
     current: "R$ 1.200,00",
     target: "R$ 1.200,00",
@@ -53,7 +51,7 @@ export default function InProgress() {
       <Progress data={details} />
       <List
         title="Transações"
-        data={[]}
+        data={transactions}
         emptyMessage="Nenhuma transação. Toque em nova transação para guardar seu primeiro dinheiro aqui."
         renderItem={({ item }) => (
           <Transaction data={item} onRemove={() => {}} />
