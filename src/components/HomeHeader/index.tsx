@@ -36,7 +36,7 @@ export function HomeHeader({ data }: Props) {
         />
 
         <Summary
-          isLeft
+          isRigth
           data={data.output}
           icon={{ name: "arrow-downward", color: colors.red[400] }}
         />

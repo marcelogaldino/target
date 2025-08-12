@@ -22,7 +22,10 @@ export default function Target() {
       />
 
       <View style={{ marginTop: 32, gap: 24 }}>
-        <Input label="Nome da meta" />
+        <Input
+          label="Nome da meta"
+          placeholder="Ex: Viagem para praia, Apple Watch..."
+        />
         <CurrencyInput
           label="Valor alvo (R$)"
           value={1250.5}
