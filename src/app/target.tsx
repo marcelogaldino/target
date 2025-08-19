@@ -2,6 +2,7 @@ import { Button } from "@/components/Button";
 import { CurrencyInput } from "@/components/CurrencyInput";
 import { Input } from "@/components/Input";
 import { PageHeader } from "@/components/PageHeader";
+import { useTargetDatabase } from "@/database/useTargetDatabase";
 import { router } from "expo-router";
 import { useLocalSearchParams } from "expo-router/build/hooks";
 import { useState } from "react";
@@ -11,6 +12,8 @@ export default function Target() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [name, setName] = useState("");
   const [amount, setAmount] = useState(null);
+
+  const targetDatabase = useTargetDatabase();
 
   const params = useLocalSearchParams<{ id?: string }>();
 
@@ -25,7 +28,7 @@ export default function Target() {
     setIsProcessing(true);
 
     if (params.id) {
-      // uopdtae
+      // update
     } else {
       create();
     }
@@ -33,6 +36,7 @@ export default function Target() {
 
   async function create() {
     try {
+      await targetDatabase.create({ name, amount });
       Alert.alert("Nova Meta", "Meta criada com sucesso!", [
         {
           text: "OK",
