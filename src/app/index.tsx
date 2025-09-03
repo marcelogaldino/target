@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button";
-import { HomeHeader } from "@/components/HomeHeader";
+import { HomeHeader, HomeHeaderProps } from "@/components/HomeHeader";
 import { List } from "@/components/List";
 import { Target, TargetProps } from "@/components/Target";
 import { useTargetDatabase } from "@/database/useTargetDatabase";
@@ -8,17 +8,15 @@ import { Alert, StatusBar, View } from "react-native";
 import { useCallback, useState } from "react";
 import { Loading } from "@/components/Loading";
 import { numberToCurrency } from "@/utils/numberToCurrency";
-
-const summary = {
-  total: "R$ 2.680,00",
-  input: { label: "Entradas", value: "R$ 860,20" },
-  output: { label: "Saidas", value: "-R$ 460,20" },
-};
+import { useTransactionDatabase } from "@/database/useTransactionsDatabase";
 
 export default function Index() {
+  const [summary, setSummary] = useState<HomeHeaderProps>();
   const [isLoading, setIsLoading] = useState(true);
   const [targets, setTargets] = useState<TargetProps[]>([]);
+
   const targetDatabase = useTargetDatabase();
+  const transactionDatabase = useTransactionDatabase();
 
   async function fetchTargets(): Promise<TargetProps[]> {
     try {
@@ -36,12 +34,38 @@ export default function Index() {
     }
   }
 
+  async function fetchSummary(): Promise<HomeHeaderProps> {
+    try {
+      const { input, output } = await transactionDatabase.summary();
+
+      return {
+        total: numberToCurrency(input + output),
+        input: {
+          label: "Entradas",
+          value: numberToCurrency(input),
+        },
+        output: {
+          label: "Saídas",
+          value: numberToCurrency(output),
+        },
+      };
+    } catch (error) {
+      Alert.alert("Erro", "Nao foi possivel carregar o resumo");
+      console.log(error);
+    }
+  }
+
   async function fetchData() {
     const targetDataPromise = fetchTargets();
+    const summaryPromise = fetchSummary();
 
-    const [targetData] = await Promise.all([targetDataPromise]);
+    const [targetData, summaryData] = await Promise.all([
+      targetDataPromise,
+      summaryPromise,
+    ]);
 
     setTargets(targetData);
+    setSummary(summaryData);
     setIsLoading(false);
   }
 
@@ -69,9 +93,6 @@ export default function Index() {
         renderItem={({ item }) => (
           <Target
             data={item}
-            // onPress={() => {
-            //   console.log(item.id);
-            // }}
             onPress={() => router.navigate(`/in-progress/${item.id}`)}
           />
         )}

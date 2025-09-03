@@ -15,6 +15,11 @@ export type TransactionResponse = {
   updated_at: Date;
 };
 
+export type Summary = {
+  input: number;
+  output: number;
+};
+
 export function useTransactionDatabase() {
   const database = useSQLiteContext();
 
@@ -39,12 +44,27 @@ export function useTransactionDatabase() {
       SELECT id, target_id, amount, observation, created_at, updated_at
       FROM transactions
       WHERE target_id = ${id}
-      ODER BY created_at DESC
+      ORDER BY created_at DESC
+    `);
+  }
+
+  async function remove(id: number) {
+    await database.runAsync("DELETE FROM transactions WHERE id = ?", id);
+  }
+
+  function summary() {
+    return database.getFirstAsync<Summary>(`
+        SELECT
+          COALESCE(SUM(CASE WHEN transactions.amount > 0 THEN transactions.amount ELSE 0 END), 0) AS input,
+          COALESCE(SUM(CASE WHEN transactions.amount < 0 THEN transactions.amount ELSE 0 END), 0) AS output
+        FROM transactions
     `);
   }
 
   return {
+    remove,
     create,
+    summary,
     listByTargetId,
   };
 }

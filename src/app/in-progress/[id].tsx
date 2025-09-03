@@ -5,13 +5,16 @@ import { PageHeader } from "@/components/PageHeader";
 import { Progress } from "@/components/Progress";
 import { Transaction, TransactionProps } from "@/components/Transaction";
 import { useTargetDatabase } from "@/database/useTargetDatabase";
+import { useTransactionDatabase } from "@/database/useTransactionsDatabase";
 import { numberToCurrency } from "@/utils/numberToCurrency";
 import { TransactionTypes } from "@/utils/TransactionType";
+import dayjs from "dayjs";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
 import { Alert, View } from "react-native";
 
 export default function InProgress() {
+  const [transactions, setTransactions] = useState<TransactionProps[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [details, setDetails] = useState({
     name: "",
@@ -20,32 +23,14 @@ export default function InProgress() {
     percentage: 0,
   });
 
-  const transactions: TransactionProps[] = [
-    {
-      id: "1",
-      value: "R$ 300,00",
-      date: "12/04/25",
-      description: "CDB de 110% no banco XPTO",
-      type: TransactionTypes.Input,
-    },
-    {
-      id: "2",
-      value: "R$ 20,00",
-      date: "12/04/25",
-      description: "",
-      type: TransactionTypes.Output,
-    },
-  ];
-
   const params = useLocalSearchParams<{ id: string }>();
 
   const targetDatabase = useTargetDatabase();
+  const transactionDatabase = useTransactionDatabase();
 
-  async function fetchDetails() {
+  async function fetchTargetDetails() {
     try {
-      console.log(`>>>>`, params.id);
       const response = await targetDatabase.show(Number(params.id));
-      console.log(response);
       setDetails({
         name: response.name,
         current: numberToCurrency(response.current),
@@ -58,10 +43,66 @@ export default function InProgress() {
     }
   }
 
-  async function fetchData() {
-    const fetchDetailsPromise = fetchDetails();
+  async function fetchTransactions() {
+    try {
+      const response = await transactionDatabase.listByTargetId(
+        Number(params.id),
+      );
+      setTransactions(
+        response.map((item) => ({
+          id: String(item.id),
+          value: numberToCurrency(item.amount),
+          date: dayjs(item.created_at).format("DD/MM/YYYY [às] HH:mm"),
+          description: item.observation,
+          type:
+            item.amount < 0 ? TransactionTypes.Output : TransactionTypes.Input,
+        })),
+      );
+      console.log("transactions >>", response);
+    } catch (error) {
+      Alert.alert("Erro", "Nao foi possivel carregar as transações");
+      console.log(error);
+    }
+  }
 
-    await Promise.all([fetchDetailsPromise]);
+  function handleRemove(id: string) {
+    if (!id) {
+      return;
+    }
+    Alert.alert(
+      "Deletar transação",
+      `Tem certeza que deseja deletar a transação ?`,
+      [
+        {
+          text: "Não",
+          style: "cancel",
+        },
+        {
+          text: "Sim",
+          onPress: () => remove(id),
+        },
+      ],
+    );
+  }
+
+  async function remove(id: string) {
+    try {
+      setIsLoading(true);
+      await transactionDatabase.remove(Number(id));
+      fetchData();
+      Alert.alert("Transação", "Transação deletada!");
+    } catch (error) {
+      Alert.alert("Erro", "Não foi possivel deletar a transação");
+      console.log(error);
+      setIsLoading(false);
+    }
+  }
+
+  async function fetchData() {
+    const fetchTargetDetailsPromise = fetchTargetDetails();
+    const fetchTransactionsPromise = fetchTransactions();
+
+    await Promise.all([fetchTargetDetailsPromise, fetchTransactionsPromise]);
 
     setIsLoading(false);
   }
@@ -99,7 +140,7 @@ export default function InProgress() {
         data={transactions}
         emptyMessage="Nenhuma transação. Toque em nova transação para guardar seu primeiro dinheiro aqui."
         renderItem={({ item }) => (
-          <Transaction data={item} onRemove={() => {}} />
+          <Transaction data={item} onRemove={() => handleRemove(item.id)} />
         )}
       />
 
