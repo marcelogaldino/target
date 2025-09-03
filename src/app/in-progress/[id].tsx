@@ -11,7 +11,7 @@ import { TransactionTypes } from "@/utils/TransactionType";
 import dayjs from "dayjs";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { useCallback, useState } from "react";
-import { Alert, View } from "react-native";
+import { Alert, StatusBar, View } from "react-native";
 
 export default function InProgress() {
   const [transactions, setTransactions] = useState<TransactionProps[]>([]);
@@ -125,6 +125,7 @@ export default function InProgress() {
         gap: 24,
       }}
     >
+      <StatusBar barStyle="dark-content" />
       <PageHeader
         title={details.name}
         subtitle="Economize para alcançar sua meta financeira"
