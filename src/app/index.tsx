@@ -7,6 +7,7 @@ import { router, useFocusEffect } from "expo-router";
 import { Alert, StatusBar, View } from "react-native";
 import { useCallback, useState } from "react";
 import { Loading } from "@/components/Loading";
+import { numberToCurrency } from "@/utils/numberToCurrency";
 
 const summary = {
   total: "R$ 2.680,00",
@@ -22,13 +23,12 @@ export default function Index() {
   async function fetchTargets(): Promise<TargetProps[]> {
     try {
       const res = await targetDatabase.listBySavedValue();
-      console.log(res);
       return res.map((item) => ({
         id: String(item.id),
         name: item.name,
-        current: String(item.current),
+        current: numberToCurrency(item.current),
         percentage: item.percentage.toFixed(0) + "%",
-        target: String(item.amount),
+        target: numberToCurrency(item.amount),
       }));
     } catch (error) {
       Alert.alert("Erro", "Nao foi possivel carregar as metas");
@@ -69,6 +69,9 @@ export default function Index() {
         renderItem={({ item }) => (
           <Target
             data={item}
+            // onPress={() => {
+            //   console.log(item.id);
+            // }}
             onPress={() => router.navigate(`/in-progress/${item.id}`)}
           />
         )}

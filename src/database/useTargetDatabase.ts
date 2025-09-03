@@ -5,10 +5,16 @@ export type TargetCreate = {
   amount: string;
 };
 
-export type TargetResponse = {
+export type TargetUpdate = {
   id: number;
   name: string;
   amount: string;
+};
+
+export type TargetResponse = {
+  id: number;
+  name: string;
+  amount: number;
   current: number;
   percentage: number;
   created_at: Date;
@@ -28,9 +34,8 @@ export function useTargetDatabase() {
         $name: data.name,
         $amount: data.amount,
       });
-      console.log(`data`, database);
     } catch (error) {
-      console.log(`asdasdasdas >>>>`, error);
+      console.log(error);
     }
   }
 
@@ -41,7 +46,7 @@ export function useTargetDatabase() {
         targets.name,
         targets.amount,
         COALESCE(SUM(transactions.amount), 0) AS current,
-        COALESCE((SUM(transactions.amount) / targets.amount) * 100, 0) AS percentage,
+        COALESCE(ROUND((SUM(transactions.amount) / targets.amount) * 100, 2), 0) AS percentage,
         targets.created_at,
         targets.updated_at
       FROM targets
@@ -51,8 +56,47 @@ export function useTargetDatabase() {
     `);
   }
 
+  function show(id: number) {
+    return database.getFirstAsync<TargetResponse>(`
+      SELECT
+        targets.id,
+        targets.name,
+        targets.amount,
+        COALESCE(SUM(transactions.amount), 0) AS current,
+        COALESCE(ROUND((SUM(transactions.amount) / targets.amount) * 100, 2), 0) AS percentage,
+        targets.created_at,
+        targets.updated_at
+      FROM targets
+      LEFT JOIN transactions ON targets.id = transactions.target_id
+      WHERE targets.id = ${id}
+    `);
+  }
+
+  async function update(data: TargetUpdate) {
+    const statement = await database.prepareAsync(`
+      UPDATE targets SET
+        name = $name,
+        amount = $amount,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = $id  
+    `);
+
+    statement.executeAsync({
+      $id: data.id,
+      $name: data.name,
+      $amount: data.amount,
+    });
+  }
+
+  async function remove(id: number) {
+    await database.runAsync("DELETE FROM targets WHERE id = ?", id);
+  }
+
   return {
+    show,
+    remove,
     create,
+    update,
     listBySavedValue,
   };
 }
